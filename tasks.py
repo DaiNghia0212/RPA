@@ -4,25 +4,27 @@ browser_lib = Selenium()
 
 
 def open_the_website(url):
-    browser_lib.open_available_browser(url)
+    browser_lib.open_user_browser(url, tab=True)
+def click_dive_in(locator):
+    browser_lib.click_element_if_visible(locator)
+
+# def search_for(term):
+#     input_field = "css:input"
+#     browser_lib.input_text(input_field, term)
+#     browser_lib.press_keys(input_field, "ENTER")
 
 
-def search_for(term):
-    input_field = "css:input"
-    browser_lib.input_text(input_field, term)
-    browser_lib.press_keys(input_field, "ENTER")
-
-
-def store_screenshot(filename):
-    browser_lib.screenshot(filename=filename)
+# def store_screenshot(filename):
+#     browser_lib.screenshot(filename=filename)
 
 
 # Define a main() function that calls the other functions in order:
 def main():
     try:
         open_the_website("https://robocorp.com/docs/")
-        search_for("python")
-        store_screenshot("output/screenshot.png")
+        click_dive_in("#home-dive-in")
+        # search_for("python")
+        # store_screenshot("output/screenshot.png")
     finally:
         browser_lib.close_all_browsers()
 
