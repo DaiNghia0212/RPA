@@ -14,8 +14,8 @@ def click_dive_in(locator):
 #     browser_lib.press_keys(input_field, "ENTER")
 
 
-# def store_screenshot(filename):
-#     browser_lib.screenshot(filename=filename)
+def store_screenshot(filename):
+    browser_lib.screenshot(filename=filename)
 
 
 # Define a main() function that calls the other functions in order:
@@ -24,7 +24,7 @@ def main():
         open_the_website("https://robocorp.com/docs/")
         click_dive_in("#home-dive-in")
         # search_for("python")
-        # store_screenshot("output/screenshot.png")
+        store_screenshot("output/screenshot.png")
     finally:
         browser_lib.close_all_browsers()
 
