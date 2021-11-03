@@ -29,21 +29,27 @@ def main():
         # search_for("python")
         time.sleep(2)
         store_screenshot("output/screenshot.png")
-        rows = browser_lib.find_element('id: agency-tiles-widget')
-        items = rows.find_elements_by_class_name('noUnderline')
-        links=[]
+        container = browser_lib.find_element('id: agency-tiles-widget')
+
+        items = container.find_elements_by_class_name('noUnderline')
+        agencies=[]
+        count=0
         for item in items:
             link = item.find_element_by_class_name('btn-sm').get_attribute('href')
+            name = item.find_element_by_class_name('w200').text
+            amounts = item.find_element_by_class_name('w900').text
             print(link)
-            links.append(link)
+            agencies.append({"link": link, "name": name, "amounts": amounts})
+            excel_lib.create_workbook("output/" + agencies[count]["name"] + ".xlsx")
+            excel_lib.create_worksheet("Agencies")
+            excel_lib.set_cell_value(1,"A",agencies[count]["amounts"])
+            excel_lib.save_workbook()
+            count += 1
+        print(agencies)
         # while (count < number) and ():         
         #     link = browser_lib.get_element_attribute('xpath: //*[@id="agency-tiles-widget"]/div/div[1]/div[{}]/div/div/div/a'.format(count),'href')
         #     print(link)
         #     count += 1
-        # excel_lib.create_workbook("output/test.xlsx")
-        # excel_lib.save_workbook()
-        # excel_lib.create_workbook("output/test.xlsx")
-        # excel_lib.save_workbook()
     finally:
         browser_lib.close_all_browsers()
 
