@@ -1,23 +1,16 @@
 from RPA.Browser.Selenium import Selenium
 from RPA.Excel.Files import Files
+import random
 
 import time
 
 browser_lib = Selenium()
 excel_lib = Files()
 
-
 def open_the_website(url):
     browser_lib.open_available_browser(url)
 def click_dive_in(xpath):
     browser_lib.click_element_when_visible(xpath)
-
-# def search_for(term):
-#     input_field = "css:input"
-#     browser_lib.input_text(input_field, term)
-#     browser_lib.press_keys(input_field, "ENTER")
-
-
 def store_screenshot(filename):
     browser_lib.screenshot(filename=filename)
 
@@ -26,31 +19,48 @@ def main():
     try:
         open_the_website("https://itdashboard.gov/")
         click_dive_in('xpath: //*[@id="node-23"]/div/div/div/div/div/div/div/a')
-        # search_for("python")
-        time.sleep(2)
-        store_screenshot("output/screenshot.png")
+
+        while browser_lib.is_element_visiable('id: agency-tiles-widget')==False:
+            continue
+
         container = browser_lib.find_element('id: agency-tiles-widget')
 
         items = container.find_elements_by_class_name('noUnderline')
-        agencies=[]
-        count=0
+        agencies = []
+        row_number = 1
+        excel_lib.create_workbook("output/Agencies.xlsx")
+        excel_lib.rename_worksheet("Sheet","Agencies")
+
         for item in items:
             link = item.find_element_by_class_name('btn-sm').get_attribute('href')
             name = item.find_element_by_class_name('w200').text
             amounts = item.find_element_by_class_name('w900').text
-            print(link)
             agencies.append({"link": link, "name": name, "amounts": amounts})
-            excel_lib.create_workbook("output/" + agencies[count]["name"] + ".xlsx")
-            excel_lib.rename_worksheet("Sheet","Agencies")
-            excel_lib.set_cell_value(1,"A",agencies[count]["amounts"])
-            excel_lib.save_workbook()
-            count += 1
-        print(agencies)
-        # while (count < number) and ():         
-        #     link = browser_lib.get_element_attribute('xpath: //*[@id="agency-tiles-widget"]/div/div[1]/div[{}]/div/div/div/a'.format(count),'href')
-        #     print(link)
-        #     count += 1
+            excel_lib.set_cell_value(row_number,"A",amounts)           
+            row_number += 1
+
+        browser_lib.close_browser()
+        agency = random.choice(agencies)
+        open_the_website(agency["link"])
+        excel_lib.create_worksheet(agency["name"])
+
+        while browser_lib.is_element_visiable('id: investments-table-object')==False:
+            continue
+
+        table = browser_lib.find_element('id: investments-table-object').find_element_by_tag_name('tbody')
+        rows = table.find_elements_by_tag_name('tr')
+        
+        row_number = 2
+
+        for row in rows:
+            values = row.find_elements_by_tag_name('td')
+            column_number = 1
+            for value in values:       
+                excel_lib.set_cell_value(row_number, column_number, value.text)
+                column_number += 1
+            row_number += 1
     finally:
+        excel_lib.save_workbook()
         browser_lib.close_all_browsers()
 
 # Call the main() function, checking that we are running as a stand-alone script:
