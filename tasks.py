@@ -20,8 +20,9 @@ def main():
         open_the_website("https://itdashboard.gov/")
         click_dive_in('xpath: //*[@id="node-23"]/div/div/div/div/div/div/div/a')
 
-        while browser_lib.is_element_visiable('id: agency-tiles-widget')==False:
+        while browser_lib.is_element_visible('id: agency-tiles-widget')==False:
             continue
+        
 
         container = browser_lib.find_element('id: agency-tiles-widget')
 
@@ -43,10 +44,24 @@ def main():
         agency = random.choice(agencies)
         open_the_website(agency["link"])
         excel_lib.create_worksheet(agency["name"])
-
-        while browser_lib.is_element_visiable('id: investments-table-object')==False:
+        
+        while browser_lib.is_element_visible('id: investments-table-object')==False:
             continue
 
+     
+        oldInfo = browser_lib.find_element('id:investments-table-object_info').text
+        click_dive_in('name:investments-table-object_length')
+        while browser_lib.is_element_visible('//*[@id="investments-table-object_length"]/label/select/option[1]')==False:
+              continue
+        store_screenshot('output/screenshot.png')
+        click_dive_in('//*[@id="investments-table-object_length"]/label/select/option[4]')
+        time.sleep(3)
+        store_screenshot('output/screensho.png')
+        newInfo = browser_lib.find_element('id:investments-table-object_info').text
+        count = 0
+        while newInfo == oldInfo:
+             newInfo = browser_lib.find_element('id:investments-table-object_info').text
+        print(newInfo)
         table = browser_lib.find_element('id: investments-table-object').find_element_by_tag_name('tbody')
         rows = table.find_elements_by_tag_name('tr')
         
@@ -59,8 +74,10 @@ def main():
                 excel_lib.set_cell_value(row_number, column_number, value.text)
                 column_number += 1
             row_number += 1
+      
     finally:
         excel_lib.save_workbook()
+        excel_lib.open_workbook("output/Agencies.xlsx")
         browser_lib.close_all_browsers()
 
 # Call the main() function, checking that we are running as a stand-alone script:
