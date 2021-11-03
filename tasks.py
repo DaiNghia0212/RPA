@@ -41,7 +41,7 @@ def main():
             print(link)
             agencies.append({"link": link, "name": name, "amounts": amounts})
             excel_lib.create_workbook("output/" + agencies[count]["name"] + ".xlsx")
-            excel_lib.create_worksheet("Agencies")
+            excel_lib.rename_worksheet("Sheet","Agencies")
             excel_lib.set_cell_value(1,"A",agencies[count]["amounts"])
             excel_lib.save_workbook()
             count += 1
