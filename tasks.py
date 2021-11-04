@@ -1,6 +1,10 @@
 from RPA.Browser.Selenium import Selenium
 from RPA.Excel.Files import Files
+from configparser import ConfigParser
 import random, time
+
+parser = ConfigParser()
+parser.read("config.ini")
 
 browser = Selenium()
 excel = Files()
@@ -73,12 +77,15 @@ def main():
         click(dive_in_button)
         wait_until_infomation_visible(agencies_info)
         
+
         excel.create_workbook("output/Agencies.xlsx")
         excel.rename_worksheet("Sheet","Agencies") 
         get_agencies_infomation()
 
        # agency = random.choice(agencies)
-        agency = agencies[0]
+        print(type(parser.get("Link", "agency_index")))
+        agency = agencies[int(parser.get("Link", "agency_index"))]
+       
         open_the_website(agency["link"])
         wait_until_infomation_visible(table_info)
 
