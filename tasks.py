@@ -1,6 +1,10 @@
 from RPA.Browser.Selenium import Selenium
 from RPA.Excel.Files import Files
+from configparser import ConfigParser
 import time
+
+parser = ConfigParser()
+parser.read("config.ini")
 
 browser = Selenium()
 excel = Files()
@@ -44,7 +48,6 @@ def get_table_infomation():
         wait_until_infomation_visible("id: business-case-pdf")
         click("id: business-case-pdf")
     time.sleep(10)
-
     rows = table.find_elements_by_tag_name('tr')     
     row_number = 2
 
@@ -73,7 +76,9 @@ def main():
         excel.rename_worksheet("Sheet","Agencies") 
         get_agencies_infomation()
 
-        agency = agencies[2]
+        print(type(parser.get("Link", "agency_index")))
+        agency = agencies[int(parser.get("Link", "agency_index"))]
+       
         open_the_website(agency["link"])
         wait_until_infomation_visible(table_info)
 
