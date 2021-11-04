@@ -1,6 +1,6 @@
 from RPA.Browser.Selenium import Selenium
 from RPA.Excel.Files import Files
-import random
+import random, time
 
 browser = Selenium()
 excel = Files()
@@ -41,6 +41,14 @@ def get_table_infomation():
     while newInfo == oldInfo:
         newInfo = browser.find_element('id: investments-table-object_info').text
     table = browser.find_element('id: investments-table-object').find_element_by_tag_name('tbody')
+    links = table.find_elements_by_tag_name('a')
+
+    for link in links:
+        open_the_website(link.get_attribute('href'))
+        wait_until_infomation_visible("id: business-case-pdf")
+        click("id: business-case-pdf")
+    time.sleep(10)
+    print(table)
     rows = table.find_elements_by_tag_name('tr')     
     row_number = 2
 
@@ -48,26 +56,29 @@ def get_table_infomation():
         values = row.find_elements_by_tag_name('td')
         column_number = 1
         for value in values:       
-            excel.set_cell_value(row_number, column_number, value.text)
+            excel.set_cell_value(row_number, column_number, value.text)   
             column_number += 1
         row_number += 1
 
-div_in_button = 'xpath: //*[@id="node-23"]/div/div/div/div/div/div/div/a'
+dive_in_button = 'xpath: //*[@id="node-23"]/div/div/div/div/div/div/div/a'
 agencies_info = 'id: agency-tiles-widget'
 table_info = 'id: investments-table-object'
 
 # Define a main() function that calls the other functions in order:
 def main():
     try:
+        browser.set_download_directory("output/", True)
         open_the_website("https://itdashboard.gov/")
-        click(div_in_button)
+        wait_until_infomation_visible(dive_in_button)
+        click(dive_in_button)
         wait_until_infomation_visible(agencies_info)
         
         excel.create_workbook("output/Agencies.xlsx")
         excel.rename_worksheet("Sheet","Agencies") 
         get_agencies_infomation()
 
-        agency = random.choice(agencies)
+       # agency = random.choice(agencies)
+        agency = agencies[0]
         open_the_website(agency["link"])
         wait_until_infomation_visible(table_info)
 
