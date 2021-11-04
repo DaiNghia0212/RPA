@@ -1,10 +1,6 @@
 from RPA.Browser.Selenium import Selenium
 from RPA.Excel.Files import Files
-from configparser import ConfigParser
-import random, time
-
-parser = ConfigParser()
-parser.read("config.ini")
+import time
 
 browser = Selenium()
 excel = Files()
@@ -15,9 +11,6 @@ def open_the_website(url):
 
 def click(locator):
     browser.click_element_when_visible(locator)
-
-# def store_screenshot(filename):
-#     browser_lib.screenshot(filename=filename)
 
 def wait_until_infomation_visible(locator):
     while browser.is_element_visible(locator)==False:
@@ -39,7 +32,6 @@ def get_agencies_infomation():
 def get_table_infomation():
     oldInfo = browser.find_element('id: investments-table-object_info').text
     click('name: investments-table-object_length')
-    #wait_until_infomation_visible('//*[@id="investments-table-object_length"]/label/select/option[1]')
     click('//*[@id="investments-table-object_length"]/label/select/option[4]')
     newInfo = browser.find_element('id: investments-table-object_info').text
     while newInfo == oldInfo:
@@ -52,7 +44,7 @@ def get_table_infomation():
         wait_until_infomation_visible("id: business-case-pdf")
         click("id: business-case-pdf")
     time.sleep(10)
-    print(table)
+
     rows = table.find_elements_by_tag_name('tr')     
     row_number = 2
 
@@ -77,15 +69,11 @@ def main():
         click(dive_in_button)
         wait_until_infomation_visible(agencies_info)
         
-
         excel.create_workbook("output/Agencies.xlsx")
         excel.rename_worksheet("Sheet","Agencies") 
         get_agencies_infomation()
 
-       # agency = random.choice(agencies)
-        print(type(parser.get("Link", "agency_index")))
-        agency = agencies[int(parser.get("Link", "agency_index"))]
-       
+        agency = agencies[2]
         open_the_website(agency["link"])
         wait_until_infomation_visible(table_info)
 
