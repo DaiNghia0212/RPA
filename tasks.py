@@ -1,5 +1,3 @@
-from os import link
-from re import A
 from RPA.Browser.Selenium import Selenium
 from RPA.Excel.Files import Files
 from configparser import ConfigParser
@@ -9,101 +7,80 @@ parser = ConfigParser()
 parser.read("config.ini")
 
 browser_lib = Selenium()
-excel_lib = Files()
-agencies = []
+excel_file = Files()
+departments = []
 
-def open_the_website(url):
-    browser_lib.open_available_browser(url)
-
-def click(locator):
+def open_browser(locator):
+     browser_lib.open_available_browser(locator)
+def click_element(locator):
     browser_lib.click_element_when_visible(locator)
-
-def wait_for_content_load(locator):
+def wait(locator):
     while browser_lib.is_element_visible(locator)==False:
         continue
 
-def get_total_spending():
-    container = browser_lib.find_element('id: agency-tiles-widget')
-    items = container.find_elements_by_class_name('noUnderline')
-    row_number = 1
-
-    for item in items:
-        link = item.find_element_by_class_name('btn-sm').get_attribute('href')
-        name = item.find_element_by_class_name('w200').text
-        money = item.find_element_by_class_name('w900').text
-        agencies.append({"link": link, "name": name, "amounts": money})            
-        excel_lib.set_cell_value(row_number,"A",money)           
-        row_number += 1
-
-def download_files(links):
-    browser_lib.set_download_directory("output/", True)
-    for link in links:
-        open_the_website(link)
-        wait_for_content_load("id: business-case-pdf")
-        click("id: business-case-pdf")
-    time.sleep(10)
-
-
-def get_table_infomation(row_number, links):    
-    table = browser_lib.find_element('id: investments-table-object').find_element_by_tag_name('tbody')
-
-    #get infomation in table
-    rows = table.find_elements_by_tag_name('tr')
-    for row in rows:
-        values = row.find_elements_by_tag_name('td')
-        column_number = 1
-        for value in values:       
-            excel_lib.set_cell_value(row_number, column_number, value.text)              
-            if column_number == 1:
-                try:
-                    links.append(value.find_element_by_tag_name('a').get_attribute('href'))
-                except:
-                    pass
-            column_number += 1
-        row_number += 1
-    return row_number, links
-       
-def get_agency_infomation():
-    row_number = 2
-    links = []
-    while browser_lib.get_element_attribute('id: investments-table-object_next','class').find('disabled') < 0:
-        row_number, links = get_table_infomation(row_number, links)
-        #click next button
-        oldState = browser_lib.find_element('id: investments-table-object_info').text
-        click('id: investments-table-object_next')
-        newState = browser_lib.find_element('id: investments-table-object_info').text
-        while newState == oldState:
-            newState = browser_lib.find_element('id: investments-table-object_info').text
-
-    row_number, links = get_table_infomation(row_number, links)
-    download_files(links)
-
-diveIn_button = '//*[@id="node-23"]/div/div/div/div/div/div/div/a'
-logo = 'id: agency-tiles-widget'
-table = 'id: investments-table-object'
+diveIn = 'xpath: //*[@id="node-23"]/div/div/div/div/div/div/div/a'
+info_agency = 'id: agency-tiles-widget'
+table_info = 'id: investments-table-object'
 
 # Define a main() function that calls the other functions in order:
 def main():
     try:
+         #open website and click the DIVE IN button
+        browser_lib.set_download_directory("output/", True)
+        open_browser("https://itdashboard.gov/")
+        wait(diveIn)
+        click_element(diveIn)
+        wait(info_agency)
+        #create an excel file 
+        excel_file.create_workbook("output/Agency.xlsx")
+        excel_file.rename_worksheet("Sheet","Agencies") 
+        agency_tiles = browser_lib.find_element('id: agency-tiles-widget')
+        items =  agency_tiles.find_elements_by_class_name('noUnderline')
+        row_index = 1
+        #get the amount of money and put it into the excel file 
+        for item in items:
+            link = item.find_element_by_class_name('btn-sm').get_attribute('href')
+            title = item.find_element_by_class_name('w200').text
+            total_money = item.find_element_by_class_name('w900').text
+            departments.append({"link": link, "title": title, "total_money": total_money})            
+            excel_file.set_cell_value(row_index,"A",total_money)           
+            row_index += 1
+        department = departments[int(parser.get("Link", "index"))]
+        #open website of selected agency
+        open_browser(department["link"])
+        wait(table_info)
+        #create another excel file
+        excel_file.create_worksheet(department["title"])
+       
+        initialInfo = browser_lib.find_element('id: investments-table-object_info').text
         
-        open_the_website("https://itdashboard.gov/")
-        wait_for_content_load(diveIn_button)
-        click(diveIn_button)
-        wait_for_content_load(logo)
+        click_element('name: investments-table-object_length')
+        click_element('//*[@id="investments-table-object_length"]/label/select/option[4]')
         
-        excel_lib.create_workbook("output/Agencies.xlsx")
-        excel_lib.rename_worksheet("Sheet","Agencies") 
-        get_total_spending()
-
-        agency = agencies[int(parser.get("Link", "agency_index"))]
-        open_the_website(agency["link"])
-        wait_for_content_load(table)
-
-        excel_lib.create_worksheet(agency["name"])
-        get_agency_infomation()
+        finalInfo = browser_lib.find_element('id: investments-table-object_info').text
+        while initialInfo == finalInfo:
+            initialInfo = browser_lib.find_element('id: investments-table-object_info').text
+        table = browser_lib.find_element('id: investments-table-object').find_element_by_tag_name('tbody')
+        links = table.find_elements_by_tag_name('a')
+        #dowload PDF files
+        for link in links:
+            open_browser(link.get_attribute('href'))
+            wait("id: business-case-pdf")
+            click_element("id: business-case-pdf")
+        time.sleep(10)
+        rows = table.find_elements_by_tag_name('tr')     
+        row_index = 2
+        #get data from the table
+        for row in rows:
+            values = row.find_elements_by_tag_name('td')
+            column_index = 1
+            for value in values:       
+                excel_file.set_cell_value(row_index, column_index, value.text)   
+                column_index += 1
+            row_index += 1
 
     finally:
-        excel_lib.save_workbook()
+        excel_file.save_workbook()
         browser_lib.close_all_browsers()
 
 # Call the main() function, checking that we are running as a stand-alone script:
