@@ -38,49 +38,45 @@ def get_total_spending():
 def download_files(links):
     browser_lib.set_download_directory("output/", True)
     for link in links:
-        open_the_website(link.get_attribute('href'))
+        open_the_website(link)
         wait_for_content_load("id: business-case-pdf")
         click("id: business-case-pdf")
-    if len(links) > 0:
-        time.sleep(10)
-        count = 1
-        while count < len(links):
-            browser_lib.close_browser()
-            count += 1
+    time.sleep(10)
 
+
+def get_table_infomation(row_number, links):    
+    table = browser_lib.find_element('id: investments-table-object').find_element_by_tag_name('tbody')
+
+    #get infomation in table
+    rows = table.find_elements_by_tag_name('tr')
+    for row in rows:
+        values = row.find_elements_by_tag_name('td')
+        column_number = 1
+        for value in values:       
+            excel_lib.set_cell_value(row_number, column_number, value.text)              
+            if column_number == 1:
+                try:
+                    links.append(value.find_element_by_tag_name('a').get_attribute('href'))
+                except:
+                    pass
+            column_number += 1
+        row_number += 1
+    return row_number, links
+       
 def get_agency_infomation():
     row_number = 2
     links = []
     while browser_lib.get_element_attribute('id: investments-table-object_next','class').find('disabled') < 0:
-        table = browser_lib.find_element('id: investments-table-object').find_element_by_tag_name('tbody')
-
-        #get pdf links
-        """ links = browser_lib.find_element('id: investments-table-object_wrapper').find_elements_by_tag_name('a')
-        remove_links = browser_lib.find_element('id: investments-table-object_paginate').find_elements_by_tag_name('a')
-        for link in remove_links:
-            links.remove(link)
-         """
-        #get infomation in table
-        rows = table.find_elements_by_tag_name('tr')
-        for row in rows:
-            values = row.find_elements_by_tag_name('td')
-            column_number = 1
-            for value in values:       
-                excel_lib.set_cell_value(row_number, column_number, value.text)              
-                if column_number == 1:
-                    try:
-                        links.append(value.get_attribute())
-                    except:
-                        pass
-                column_number += 1
-            row_number += 1
+        row_number, links = get_table_infomation(row_number, links)
         #click next button
         oldState = browser_lib.find_element('id: investments-table-object_info').text
         click('id: investments-table-object_next')
         newState = browser_lib.find_element('id: investments-table-object_info').text
         while newState == oldState:
             newState = browser_lib.find_element('id: investments-table-object_info').text
-        download_files(links)
+
+    row_number, links = get_table_infomation(row_number, links)
+    download_files(links)
 
 diveIn_button = '//*[@id="node-23"]/div/div/div/div/div/div/div/a'
 logo = 'id: agency-tiles-widget'
