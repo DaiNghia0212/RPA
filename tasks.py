@@ -50,7 +50,7 @@ def download_files(links):
 
 def get_agency_infomation():
     row_number = 2
-
+    links = []
     while browser_lib.get_element_attribute('id: investments-table-object_next','class').find('disabled') < 0:
         table = browser_lib.find_element('id: investments-table-object').find_element_by_tag_name('tbody')
 
