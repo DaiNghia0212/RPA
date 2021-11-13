@@ -20,7 +20,7 @@ def main():
         itdash.get_agencies_infomation()
         agency = itdash.agencies[int(parser.get("Link", "agency_index"))]
         agencyWebsite = data.Agency(
-            agency["link"], agency["name"], 
+            agency["link"], agency["name"],
             table_info='id: investments-table-object')
 
         agencyWebsite.open()

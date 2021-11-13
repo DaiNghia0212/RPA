@@ -1,7 +1,8 @@
 from RPA.Browser.Selenium import Selenium
 from RPA.Excel.Files import Files
+from RPA.PDF import PDF
 
-
+pdf = PDF()
 browser = Selenium()
 excel = Files()
 
@@ -14,6 +15,7 @@ def wait_until_element_visible(locator):
 class Agency:
     oldInfo = ''
     summaryData = []
+
     def __init__(self, url, name, table_info):
         self.url = url
         self.name = name
@@ -54,23 +56,24 @@ class Agency:
             'aria-busy',
                 'true'):
             continue
-        print(table)
+
         rows = table.find_elements_by_tag_name('tr')
         row_number = 2
         excel.create_worksheet(self.name)
         for row in rows:
             values = row.find_elements_by_tag_name('td')
             column_number = 1
-            count = 0
-            for index,value in enumerate(values):
-                if (index == 0):
-                   dataUI = value.text
-                elif index == 2:
-                   investTitle = value.text
+            for value in values:
+                if column_number == 1:
+                    dataUII = value.text
+                elif column_number == 3:
+                    investment_title = value.text
                 excel.set_cell_value(row_number, column_number, value.text)
                 column_number += 1
-            self.summaryData.append({"UI":dataUI,"nameInvest":investTitle})
+            self.summaryData.append(
+                {"UII": dataUII, "investment_title": investment_title})
             row_number += 1
-        print(self.summaryData);
+        print(pdf.get_text_from_pdf(
+            './output/' + self.summaryData[0]["UII"] + '.pdf', '1'))
         excel.save_workbook()
         browser.close_all_browsers()
