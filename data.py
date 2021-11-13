@@ -13,7 +13,7 @@ def wait_until_element_visible(locator):
 
 class Agency:
     oldInfo = ''
-
+    summaryData = []
     def __init__(self, url, name, table_info):
         self.url = url
         self.name = name
@@ -61,10 +61,16 @@ class Agency:
         for row in rows:
             values = row.find_elements_by_tag_name('td')
             column_number = 1
-            for value in values:
+            count = 0
+            for index,value in enumerate(values):
+                if (index == 0):
+                   dataUI = value.text
+                elif index == 2:
+                   investTitle = value.text
                 excel.set_cell_value(row_number, column_number, value.text)
                 column_number += 1
+            self.summaryData.append({"UI":dataUI,"nameInvest":investTitle})
             row_number += 1
-
+        print(self.summaryData);
         excel.save_workbook()
         browser.close_all_browsers()
