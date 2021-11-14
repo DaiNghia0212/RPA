@@ -46,10 +46,11 @@ class Agency:
         excel.open_workbook('output/Agencies.xlsx')
         table = browser.find_element(
             'id: investments-table-object').find_element_by_tag_name('tbody')
-        links = table.find_elements_by_tag_name('a')
-        numberOfLink = len(links)
-        for link in links:
-            browser.open_available_browser(link.get_attribute('href'))
+        anchors = table.find_elements_by_tag_name('a')
+        links = ""
+        for anchor in anchors:
+            links = links + " " + anchor.get_attribute('href')
+            browser.open_available_browser(anchor.get_attribute('href'))
             wait_until_element_visible("id: business-case-pdf")
             browser.click_element("id: business-case-pdf")
         while browser.is_element_attribute_equal_to(
@@ -61,35 +62,46 @@ class Agency:
         rows = table.find_elements_by_tag_name('tr')
         row_number = 2
         excel.create_worksheet(self.name)
+
         for row in rows:
             values = row.find_elements_by_tag_name('td')
             column_number = 1
+            if links.find(values[0].text) >= 0:
+                UIIvalue = values[0].text
+                investment_title = values[2].text
+                self.summaryData.append(
+                 {"UII": UIIvalue, "investment_title": investment_title})
             for value in values:
-                if column_number == 1:
-                    dataUII = value.text
-                elif column_number == 3:
-                    investment_title = value.text
                 excel.set_cell_value(row_number, column_number, value.text)
                 column_number += 1
-            self.summaryData.append(
-                {"UII": dataUII, "investment_title": investment_title})
             row_number += 1
-        # print(self.summaryData[0]["UII"])
 
-        print(self.summaryData)
-        for index in range(numberOfLink):
-            link_file = './output/' + self.summaryData[index]["UII"] + '.pdf'
-            pdf.open_pdf(link_file)
-            text = pdf.get_text_from_pdf(link_file, '1')
-            data = text[1]
-            startName = data.find('Name of this Investment') + 25
-            endName = data.find('Unique Investment Identifier') - 3
-            startID = endName + 39
-            endID = data.find('Section B')
-            name = data[startName:endName]
-            id = data[startID:endID]
-            print(name)
-            print(id)
+        for data in self.summaryData:
+            print(data["UII"])
+        for data in self.summaryData:
+            link_file = './output/' + data["UII"] + '.pdf'
+            text = pdf.get_text_from_pdf(link_file, '1')[1]
+        # get name of this investment
+            start = text.find('Name of this Investment') + 25
+            end = text.find('Unique Investment Identifier') - 3
+            investment_name = text[start:end]
+        # get unique investment identifier
+            start = end + 39
+            end = text.find('Section B')
+            uii = text[start:end]
+            print(data["investment_title"])
+            print('''Compare the value "Name of this Investment" with
+the column "Investment Title": ''')
+            if data["investment_title"] == investment_name:
+                print(True)
+            else:
+                print(False)
+            print('''Compare the value "Unique Investment Identifier (UII)"
+with the column "UII": ''')
+            if data["UII"] == uii:
+                print(True)
+            else:
+                print(False)
             pdf.close_pdf(link_file)
 
         excel.save_workbook()
