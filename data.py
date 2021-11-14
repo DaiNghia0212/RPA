@@ -47,6 +47,7 @@ class Agency:
         table = browser.find_element(
             'id: investments-table-object').find_element_by_tag_name('tbody')
         links = table.find_elements_by_tag_name('a')
+        numberOfLink = len(links)
         for link in links:
             browser.open_available_browser(link.get_attribute('href'))
             wait_until_element_visible("id: business-case-pdf")
@@ -73,7 +74,23 @@ class Agency:
             self.summaryData.append(
                 {"UII": dataUII, "investment_title": investment_title})
             row_number += 1
-        print(pdf.get_text_from_pdf(
-            './output/' + self.summaryData[0]["UII"] + '.pdf', '1'))
+        # print(self.summaryData[0]["UII"])
+
+        print(self.summaryData)
+        for index in range(numberOfLink):
+            link_file = './output/' + self.summaryData[index]["UII"] + '.pdf'
+            pdf.open_pdf(link_file)
+            text = pdf.get_text_from_pdf(link_file, '1')
+            data = text[1]
+            startName = data.find('Name of this Investment') + 25
+            endName = data.find('Unique Investment Identifier') - 3
+            startID = endName + 39
+            endID = data.find('Section B')
+            name = data[startName:endName]
+            id = data[startID:endID]
+            print(name)
+            print(id)
+            pdf.close_pdf(link_file)
+
         excel.save_workbook()
         browser.close_all_browsers()
