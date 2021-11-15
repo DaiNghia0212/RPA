@@ -3,7 +3,7 @@ from RPA.PDF import PDF
 pdf = PDF()
 
 
-class pdfFiles:
+class pdfData:
     def __init__(self, data_table):
         self.data_table = data_table
 

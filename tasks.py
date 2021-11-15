@@ -1,8 +1,8 @@
 
 from configparser import ConfigParser
 from website import Website
-import data
-from pdfData import pdfFiles
+from excel import getData
+from pdf import pdfData
 
 parser = ConfigParser()
 parser.read("config.ini")
@@ -30,15 +30,9 @@ def main():
         agency_website.click('''//*[@name="investments-table-object_length"]
                                              /option[4]''')
         agency_website.wait_for_loading('id:investments-table-object_info')
-
-        # agencyWebsite.open()
-        # agencyWebsite.wait_table()
-        # agencyWebsite.click_select_all()
-        # agencyWebsite.wait_table_load_all()
-        # data_table = agencyWebsite.get_table_info()
-        # pdf = pdfFiles(data_table)
-        # pdf.get_data()
-
+        
+        excel_files = getData()
+        excel_files.get_table_info()
     finally:
         print('Done')
 
