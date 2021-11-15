@@ -15,26 +15,26 @@ class Website:
     def open(self):
         browser.open_available_browser(self.url)
 
-    def wait(locator):
+    def wait(self, locator):
         while not browser.is_element_visible(locator):
             continue
 
     def click(self, locator):
         self.wait(locator)
         browser.click_element(locator)
-    
-    def wait_table_load_all(self):
+
+    def wait_for_loading(self, locator):
         old_info = browser.find_element(
-            'id: investments-table-object_info').text
+            locator).text
         new_info = browser.find_element(
-            'id: investments-table-object_info').text
+            locator).text
         while new_info == old_info:
             new_info = browser.find_element(
-                'id: investments-table-object_info').text
+                locator).text
 
-    def get_agencies_infomation(self):
-        self.wait_until_element_visible(self.agencies_info)
-        container = browser.find_element(self.agencies_info)
+    def get_agencies_infomation(self, agencies_info):
+        self.wait(agencies_info)
+        container = browser.find_element(agencies_info)
         items = container.find_elements_by_class_name('noUnderline')
         row_number = 1
         excel.create_workbook("output/Agencies.xlsx")
