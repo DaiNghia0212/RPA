@@ -2,6 +2,7 @@
 from configparser import ConfigParser
 from website import Website
 import data
+from pdfData import pdfFiles
 
 parser = ConfigParser()
 parser.read("config.ini")
@@ -27,7 +28,10 @@ def main():
         agencyWebsite.wait_table()
         agencyWebsite.click_select_all()
         agencyWebsite.wait_table_load_all()
-        agencyWebsite.get_table_info()
+        data_table = agencyWebsite.get_table_info()
+        pdf = pdfFiles(data_table)
+        pdf.get_data()
+
     finally:
         print('Done')
 
