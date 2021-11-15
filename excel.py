@@ -1,17 +1,17 @@
-from RPA.Browser.Selenium import Selenium
-from RPA.Excel.Files import Files
+from website import excel
+from website import browser
 
-browser = Selenium()
-excel = Files()
 
 class getData:
     summaryData = []
-    def __init__(self, table_info):
-        self.table_info = table_info
 
-    def wait(locator):
+    def __init__(self, worksheet_name):
+        self.worksheet_name = worksheet_name
+
+    def wait(self, locator):
         while not browser.is_element_visible(locator):
-              continue
+            continue
+
     def get_table_info(self):
         browser.set_download_directory("./output", True)
         excel.open_workbook('output/Agencies.xlsx')
@@ -32,7 +32,7 @@ class getData:
 
         rows = table.find_elements_by_tag_name('tr')
         row_number = 2
-        excel.create_worksheet(self.name)
+        excel.create_worksheet(self.worksheet_name)
 
         for row in rows:
             values = row.find_elements_by_tag_name('td')
@@ -41,7 +41,7 @@ class getData:
                 UIIvalue = values[0].text
                 investment_title = values[2].text
                 self.summaryData.append(
-                 {"UII": UIIvalue, "investment_title": investment_title})
+                    {"UII": UIIvalue, "investment_title": investment_title})
             for value in values:
                 excel.set_cell_value(row_number, column_number, value.text)
                 column_number += 1

@@ -9,8 +9,6 @@ class pdfData:
 
     def get_data(self):
         for data in self.data_table:
-            print(data["UII"])
-        for data in self.data_table:
             link_file = './output/' + data["UII"] + '.pdf'
             text = pdf.get_text_from_pdf(link_file, '1')[1]
         # get name of this investment
