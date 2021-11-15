@@ -1,8 +1,6 @@
 from RPA.Browser.Selenium import Selenium
 from RPA.Excel.Files import Files
-from RPA.PDF import PDF
 
-pdf = PDF()
 browser = Selenium()
 excel = Files()
 
@@ -13,7 +11,6 @@ def wait_until_element_visible(locator):
 
 
 class Agency:
-    oldInfo = ''
     summaryData = []
 
     def __init__(self, url, name, table_info):
@@ -28,18 +25,9 @@ class Agency:
         wait_until_element_visible(self.table_info)
 
     def click_select_all(self):
-        self.oldInfo = browser.find_element(
-            'id: investments-table-object_info').text
         browser.click_element('name: investments-table-object_length')
         browser.click_element(
             '//*[@name="investments-table-object_length"]/option[4]')
-
-    def wait_table_load_all(self):
-        newInfo = browser.find_element(
-            'id: investments-table-object_info').text
-        while newInfo == self.oldInfo:
-            newInfo = browser.find_element(
-                'id: investments-table-object_info').text
 
     def get_table_info(self):
         browser.set_download_directory("./output", True)
@@ -75,7 +63,6 @@ class Agency:
                 excel.set_cell_value(row_number, column_number, value.text)
                 column_number += 1
             row_number += 1
-        return self.summaryData
 
 #         for data in self.summaryData:
 #             print(data["UII"])
@@ -107,3 +94,4 @@ class Agency:
 
         excel.save_workbook()
         browser.close_all_browsers()
+        return self.summaryData

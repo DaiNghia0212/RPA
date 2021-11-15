@@ -6,28 +6,34 @@ browser = Selenium()
 excel = Files()
 
 
-def wait_until_element_visible(locator):
-    while not browser.is_element_visible(locator):
-        continue
-
-
 class Website:
     agencies = []
 
-    def __init__(self, url, button, agencies_info):
+    def __init__(self, url):
         self.url = url
-        self.button = button
-        self.agencies_info = agencies_info
 
     def open(self):
         browser.open_available_browser(self.url)
 
-    def click_dive_in_button(self):
-        wait_until_element_visible(self.button)
-        browser.click_element(self.button)
+    def wait(locator):
+        while not browser.is_element_visible(locator):
+            continue
+
+    def click(self, locator):
+        self.wait(locator)
+        browser.click_element(locator)
+    
+    def wait_table_load_all(self):
+        old_info = browser.find_element(
+            'id: investments-table-object_info').text
+        new_info = browser.find_element(
+            'id: investments-table-object_info').text
+        while new_info == old_info:
+            new_info = browser.find_element(
+                'id: investments-table-object_info').text
 
     def get_agencies_infomation(self):
-        wait_until_element_visible(self.agencies_info)
+        self.wait_until_element_visible(self.agencies_info)
         container = browser.find_element(self.agencies_info)
         items = container.find_elements_by_class_name('noUnderline')
         row_number = 1
